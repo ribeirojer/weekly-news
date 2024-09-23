@@ -46,7 +46,7 @@ async function callOpenAI(endpoint: string, prompt: string) {
 }
 
 // Function to identify the weekend news from titles
-export async function identifiesWeekendNews(allTitles: { id: number, title: string }[]) {
+export async function getWeekendNewsId(allTitles: { id: number, title: string }[]) {
   const prompt = `selecione apenas uma notícia que se refira a eventos no fim de semana dado os seguintes títulos, e retorne apenas o numero do id dela: ${JSON.stringify(allTitles)}`;
   const newsId = await callOpenAI(openaiUrl, prompt);
   return newsId;
@@ -60,7 +60,7 @@ export async function generateNewsSummary(content: string) {
 }
 
 // Function to identify relevant news based on a given article
-export async function identifiesMostRelevantNews(allTitles: { id: number, title: string }[], idWeekendNews: number) {
+export async function getRelevantNewsIds(allTitles: { id: number, title: string }[], idWeekendNews: number) {
   const prompt = `Dado as seguintes notícias: ${JSON.stringify(allTitles)}, identifique quais são as três notícias mais relevantes do momento, excluindo a de número: ${idWeekendNews}, retorne apenas os ids, separados por virgulas`;
   const relevantNews = await callOpenAI(openaiUrl, prompt); // Replace with actual endpoint
   return relevantNews;

@@ -6,7 +6,7 @@ const resendUrl = 'https://api.resend.com/emails';
 
 const RESEND_API_KEY = env.RESEND_API_KEY || Deno.env.get("RESEND_API_KEY");
 
-export async function sendWeeklyEmail(email: string = "joinvilleinfo@proton.me", emailBody: string) {
+export async function sendEmail(email: string = "joinvilleinfo@proton.me", emailBody: string) {
     const res = await fetch(resendUrl, {
         method: 'POST',
         headers: {
@@ -25,15 +25,15 @@ export async function sendWeeklyEmail(email: string = "joinvilleinfo@proton.me",
     console.log(data);
 }
 
-export function generateEmailBody(username: string, weekendNews: INews[], mostRelevantNews: INews[]) {
+export function generateEmailBody(username: string, weekendNews:  INews | undefined, mostRelevantNews: INews[]) {
     return `
   ${htmlEmailHeader}
       <div class="container">
       <h1>Olá, ${username}!</h1>
       <p>Confira as principais notícias da semana:</p>
       <div>
-      <img src="${weekendNews[0].cover_image_url}" alt="${weekendNews[0].title}">
-      <h3>${weekendNews[0].title}</h3>
+      <img src="${weekendNews?.cover_image_url}" alt="${weekendNews?.title}">
+      <h3>${weekendNews?.title}</h3>
       </div>  
       <h2>Mais Relevantes:</h2>
       <ul class="grid">

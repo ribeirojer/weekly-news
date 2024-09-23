@@ -1,55 +1,41 @@
 import { getOldNews, getUsers } from "./supabase.ts";
 import { getFiveDayAgoDate } from "./utils.ts";
-import { identifiesWeekendNews, identifiesMostRelevantNews } from "./openai.ts";
-import { generateEmailBody, sendWeeklyEmail } from "./send_email.ts";
+import { getWeekendNewsId, getRelevantNewsIds } from "./openai.ts";
+import { generateEmailBody, sendEmail } from "./send_email.ts";
 
-async function sendWeeklyNews() {
+async function sendNewsletter() {
   try {
-    // Calcula a data de uma semana atrás
     const oneWeekAgo = getFiveDayAgoDate();
-
-    // Busca as notícias antigas no Supabase
     const news = await getOldNews(oneWeekAgo);
     const users = await getUsers();
 
     if (news && news.length > 0) {
-      const allTitles = news.map((n) => {
-        return { id: n.id, title: n.title }});
+      const weekendNewsId = await getWeekendNewsId(news);
+      const weekendNews = news.find(n => n.id == weekendNewsId);
 
-      const idWeekendNews: number = await identifiesWeekendNews(allTitles)
-      const weekendNews = news.filter((n) => n.id == idWeekendNews)
-      
-      const idsMostRelevantNews: string = await identifiesMostRelevantNews(allTitles, idWeekendNews)
+      const relevantNewsIds = await getRelevantNewsIds(news, weekendNewsId);
+      const relevantNews = news.filter(n => relevantNewsIds.includes(n.id.toString()));
 
-      const idsMostRelevantNewsArray = idsMostRelevantNews.split(", ");
-      const mostRelevantNews = news.filter((n) => idsMostRelevantNewsArray.includes(n.id.toString()));
-      
-      // Enviar email para cada usuário
       for (const user of users) {
         try {
-          const emailBody = generateEmailBody(user.username, weekendNews, mostRelevantNews); // Função para gerar o corpo do email
-          await sendWeeklyEmail(user.email, emailBody);
+          const emailBody = generateEmailBody(user.username, weekendNews, relevantNews);
+          await sendEmail(user.email, emailBody);
           console.log(`Email enviado para ${user.email}`);
         } catch (error) {
           console.error(`Erro ao enviar email para ${user.email}:`, error);
         }
-      }      
+      }
     } else {
-      console.log("Nenhuma notícia para transferir.");
+      console.log("Nenhuma notícia para enviar.");
     }
   } catch (error) {
-    console.error("Erro durante a transferência de notícias:", error);
+    console.error("Erro durante o envio de newsletter:", error);
   }
 }
 
-Deno.cron("envio de noticias", "0 10 * * 5", () => {
-  console.log("Iniciando o cron job de envio de notícias semanais...");
-  sendWeeklyNews().then(() => {
-      console.log("Cron job de envio de notícias semanais concluído com sucesso.");
-    },
-    (error) => {
-      console.error("Erro durante a execução do cron job de envio de notícias semanais:", error);
-    }
-  );
+Deno.cron("envio de noticias", "0 10 * * 6", () => {
+  console.log("Iniciando o cron job de envio de newsletter...");
+  sendNewsletter()
+    .then(() => console.log("Cron job concluído com sucesso."))
+    .catch(error => console.error("Erro no cron job:", error));
 });
-
