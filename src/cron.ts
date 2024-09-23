@@ -42,9 +42,14 @@ async function sendWeeklyNews() {
   }
 }
 
-Deno.cron("envio de notícias semanais", "0 10 * * 5", () => {
+Deno.cron("envio de noticias", "0 10 * * 5", () => {
   console.log("Iniciando o cron job de envio de notícias semanais...");
-  sendWeeklyNews();
-  console.log("Cron job de envio de notícias semanais concluído.");
+  sendWeeklyNews().then(() => {
+      console.log("Cron job de envio de notícias semanais concluído com sucesso.");
+    },
+    (error) => {
+      console.error("Erro durante a execução do cron job de envio de notícias semanais:", error);
+    }
+  );
 });
 
