@@ -1,4 +1,3 @@
-import { cron } from "https://deno.land/x/deno_cron@v1.0.0/cron.ts";
 import { getOldNews, getUsers } from "./supabase.ts";
 import { getFiveDayAgoDate } from "./utils.ts";
 import { identifiesWeekendNews, identifiesMostRelevantNews } from "./openai.ts";
@@ -43,8 +42,9 @@ async function sendWeeklyNews() {
   }
 }
 
-cron("0 10 * * 5", () => {
+Deno.cron("envio de notícias semanais", "0 10 * * 5", () => {
   console.log("Iniciando o cron job de envio de notícias semanais...");
   sendWeeklyNews();
   console.log("Cron job de envio de notícias semanais concluído.");
 });
+
