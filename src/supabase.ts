@@ -7,11 +7,11 @@ const supabaseKey = env.SUPABASE_KEY || Deno.env.get("SUPABASE_KEY");
 
 if (!supabaseUrl) {
 	console.error("supabaseUrl não configurada.");
-	Deno.exit(1);
+	//Deno.exit(1);
 }
 if (!supabaseKey) {
 	console.error("supabaseKey não configurada.");
-	Deno.exit(1);
+	//Deno.exit(1);
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
