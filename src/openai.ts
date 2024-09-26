@@ -9,59 +9,64 @@ const OPENAI_API_KEY = env.OPENAI_API_KEY || Deno.env.get("OPENAI_API_KEY");
 
 // Function to validate the API key
 function validateApiKey() {
-  if (!OPENAI_API_KEY) {
-    console.error("OPENAI_API_KEY not configured.");
-    Deno.exit(1);
-  }
+	if (!OPENAI_API_KEY) {
+		console.error("OPENAI_API_KEY not configured.");
+		Deno.exit(1);
+	}
 }
 
 // Helper function to build the OpenAI API request body
 function buildOpenAIRequestBody(prompt: string) {
-  return {
-    "model": "gpt-4o-mini",
-    "messages": [
-      {
-        "role": "user",
-        "content": prompt
-      }
-    ]
-  };
+	return {
+		model: "gpt-4o-mini",
+		messages: [
+			{
+				role: "user",
+				content: prompt,
+			},
+		],
+	};
 }
 
 // Function to send a request to the OpenAI API
 async function callOpenAI(endpoint: string, prompt: string) {
-  validateApiKey();
+	validateApiKey();
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify(buildOpenAIRequestBody(prompt))
-  });
+	const response = await fetch(endpoint, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${OPENAI_API_KEY}`,
+		},
+		body: JSON.stringify(buildOpenAIRequestBody(prompt)),
+	});
 
-  const data = await response.json();
-  return data.choices[0].message.content;
+	const data = await response.json();
+	return data.choices[0].message.content;
 }
 
 // Function to identify the weekend news from titles
-export async function getWeekendNewsId(allTitles: { id: number, title: string }[]) {
-  const prompt = `selecione apenas uma notícia que se refira a eventos no fim de semana dado os seguintes títulos, e retorne apenas o numero do id dela: ${JSON.stringify(allTitles)}`;
-  const newsId = await callOpenAI(openaiUrl, prompt);
-  return newsId;
+export async function getWeekendNewsId(
+	allTitles: { id: number; title: string }[],
+) {
+	const prompt = `selecione apenas uma notícia que se refira a eventos no fim de semana dado os seguintes títulos, e retorne apenas o numero do id dela: ${JSON.stringify(allTitles)}`;
+	const newsId = await callOpenAI(openaiUrl, prompt);
+	return newsId;
 }
 
 // Function to generate a summary of a news article
 export async function generateNewsSummary(content: string) {
-  const prompt = `resuma brevemente a notícia:\n\n ${content}`;
-  const summary = await callOpenAI(openaiUrl, prompt); // Replace with actual endpoint
-  return summary;
+	const prompt = `resuma brevemente a notícia:\n\n ${content}`;
+	const summary = await callOpenAI(openaiUrl, prompt); // Replace with actual endpoint
+	return summary;
 }
 
 // Function to identify relevant news based on a given article
-export async function getRelevantNewsIds(allTitles: { id: number, title: string }[], idWeekendNews: number) {
-  const prompt = `Dado as seguintes notícias: ${JSON.stringify(allTitles)}, identifique quais são as três notícias mais relevantes do momento, excluindo a de número: ${idWeekendNews}, retorne apenas os ids, separados por virgulas`;
-  const relevantNews = await callOpenAI(openaiUrl, prompt); // Replace with actual endpoint
-  return relevantNews;
+export async function getRelevantNewsIds(
+	allTitles: { id: number; title: string }[],
+	idWeekendNews: number,
+) {
+	const prompt = `Dado as seguintes notícias: ${JSON.stringify(allTitles)}, identifique quais são as três notícias mais relevantes do momento, excluindo a de número: ${idWeekendNews}, retorne apenas os ids, separados por virgulas`;
+	const relevantNews = await callOpenAI(openaiUrl, prompt); // Replace with actual endpoint
+	return relevantNews;
 }

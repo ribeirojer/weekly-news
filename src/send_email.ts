@@ -1,32 +1,36 @@
 import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-import { INews } from "./supabase.ts";
+import type { INews } from "./supabase.ts";
 
 const env = await load();
-const resendUrl = 'https://api.resend.com/emails';
+const resendUrl = "https://api.resend.com/emails";
 
 const RESEND_API_KEY = env.RESEND_API_KEY || Deno.env.get("RESEND_API_KEY");
 
-export async function sendEmail(email: string = "joinvilleinfo@proton.me", emailBody: string) {
-    const res = await fetch(resendUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${RESEND_API_KEY}`
-        },
-        body: JSON.stringify({
-            from: 'Acme <onboarding@resend.dev>',
-            to: email,
-            subject: 'hello world',
-            html: emailBody,
-        })
-    });
+export async function sendEmail(email: string, emailBody: string) {
+	const res = await fetch(resendUrl, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${RESEND_API_KEY}`,
+		},
+		body: JSON.stringify({
+			from: "contato@joinvilleinfo.com.br",
+			to: email,
+			subject: "Notícias da semana",
+			html: emailBody,
+		}),
+	});
 
-    const data = await res.json();
-    console.log(data);
+	const data = await res.json();
+	console.log(data);
 }
 
-export function generateEmailBody(username: string, weekendNews:  INews | undefined, mostRelevantNews: INews[]) {
-    return `
+export function generateEmailBody(
+	username: string,
+	weekendNews: INews | undefined,
+	mostRelevantNews: INews[],
+) {
+	return `
   ${htmlEmailHeader}
       <div class="container">
       <h1>Olá, ${username}!</h1>
@@ -37,14 +41,18 @@ export function generateEmailBody(username: string, weekendNews:  INews | undefi
       </div>  
       <h2>Mais Relevantes:</h2>
       <ul class="grid">
-        ${mostRelevantNews.map((news) => `
+        ${mostRelevantNews
+					.map(
+						(news) => `
           <li>
             <a href="https://www.joinvilleinfo.com.br/noticia/${news.friendly_url}">
             <img src="${news.cover_image_url}" alt="${news.title}">
             <h4>${news.title}</h4>
             </a>
           </li>
-        `).join('')}
+        `,
+					)
+					.join("")}
       </ul>
       <div class="cta">
       <a href="https://www.joinvilleinfo.com.br" class="button">
@@ -54,7 +62,7 @@ export function generateEmailBody(username: string, weekendNews:  INews | undefi
       </div>
       ${htmlEmailFooter}
     `;
-  }
+}
 
 const htmlEmailHeader = `
 <!DOCTYPE html>
@@ -220,7 +228,7 @@ h1 {
   <img src="https://www.joinvilleinfo.com.br/logo_insta.png" alt="Joinville Info Logo" class="hero-image">
   <span class="md:mr-12 text-3xl -ml-2 font-bold text-white">INFO</span>
 </div>
-`
+`;
 const htmlEmailFooter = `
 
 <div class="social-icons">
@@ -236,4 +244,4 @@ const htmlEmailFooter = `
 </div>
 </body>
 </html>
-`
+`;
