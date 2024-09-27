@@ -13,6 +13,11 @@ async function sendNewsletter() {
 			const weekendNewsId = await getWeekendNewsId(news);
 			const weekendNews = news.find((n) => n.id === weekendNewsId);
 
+      if (!weekendNews) {
+        console.error("Notícia de fim de semana não encontrada.");
+        return;
+      }
+
 			const relevantNewsIds = await getRelevantNewsIds(news, weekendNewsId);
 			const relevantNews = news.filter((n) =>
 				relevantNewsIds.includes(n.id.toString()),
@@ -39,7 +44,7 @@ async function sendNewsletter() {
 	}
 }
 
-Deno.cron("envio de noticias", "0 10 * * 6", () => {
+Deno.cron("envio de noticias", "0 13 * * 6", () => {
 	console.log("Iniciando o cron job de envio de newsletter...");
 	sendNewsletter()
 		.then(() => console.log("Cron job concluído com sucesso."))
